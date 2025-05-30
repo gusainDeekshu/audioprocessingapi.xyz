@@ -1,3 +1,6 @@
 PORT=3000
 # CLEAN_INTERVAL in miliseconds for cleaning the downloads directory
-CLEAN_INTERVAL=30000 
+CLEAN_INTERVAL=50000
+
+EMAIL="your@gmail.com"
+PASSWORD="pass@pass"

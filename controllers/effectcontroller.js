@@ -2,6 +2,9 @@ const { exec } = require("child_process");
 const { v4: uuidv4 } = require("uuid");
 const path = require("path");
 const fs = require("fs");
+require('dotenv').config();
+const Email = process.env.EMAIL || "youremail.com";
+const Password = process.env.PASSWORD || "password";
 
 const DOWNLOAD_DIR = path.resolve(__dirname, "../downloads");
 
@@ -40,7 +43,7 @@ const processVideo = async (req, res) => {
   const mp3Path = path.join(DOWNLOAD_DIR, `${id}.mp3`);
   const processedPath = path.join(DOWNLOAD_DIR, `${id}_processed.mp3`);
 
-  const ytCmd = `yt-dlp -x --audio-format mp3 -o "${DOWNLOAD_DIR}/${id}.%(ext)s" "${youtubeUrl}"`;
+  const ytCmd = `yt-dlp -u "${Email}" -p "${Password}" -x --audio-format mp3 -o "${DOWNLOAD_DIR}/${id}.%(ext)s" "${youtubeUrl}"`;
 
   exec(ytCmd, (err) => {
     if (err) {
