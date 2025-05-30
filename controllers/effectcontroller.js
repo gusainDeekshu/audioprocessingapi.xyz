@@ -137,46 +137,35 @@ const processVideo = async (req, res) => {
           downloadSlowedReverbUrl: `/downloads/${id}_processed.mp3`,
         });
       });
-    } else if (effect === "vocal_remove") {
-      // Run Demucs to separate vocals and no vocals from the input mp3
-      // -o specifies the parent output directory where Demucs creates 'htdemucs' subfolder
-      // The input file is mp3Path, output goes to DOWNLOAD_DIR/htdemucs/{input_basename}/
-      const cmd = `python3 -m demucs --two-stems=vocals -o "${DOWNLOAD_DIR}" "${mp3Path}"`;
-      console.log("Executing Demucs command:", cmd);
+    }else if (effect === "vocal_remove") {
+  const outputDir = path.join(DOWNLOAD_DIR, "spleeter_output");
+  if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
 
-      exec(cmd, (err, stdout, stderr) => {
-        if (err) {
-          console.error("Demucs error:", err);
-          console.error("Demucs stderr:", stderr);
-          return res.status(500).json({ error: "Demucs processing failed" });
-        }
-        console.log("Demucs stdout:", stdout);
+  const cmd = `spleeter separate -p spleeter:2stems -o "${outputDir}" "${mp3Path}"`;
 
-        // Construct expected output paths based on Demucs default output folder structure
-        const id = path.basename(mp3Path, path.extname(mp3Path));
-        const outputBasePath = path.join(DOWNLOAD_DIR, "htdemucs", id);
-        const noVocalsFile = path.join(outputBasePath, "no_vocals.wav");
-        const vocalsFile = path.join(outputBasePath, "vocals.wav");
+  exec(cmd, (err, stdout, stderr) => {
+    if (err) {
+      console.error("Spleeter error:", err);
+      console.error(stderr);
+      return res.status(500).json({ error: "Spleeter processing failed" });
+    }
 
-        // Verify that output files exist
-        if (!fs.existsSync(noVocalsFile) || !fs.existsSync(vocalsFile)) {
-          console.error(
-            "Demucs output files missing:",
-            noVocalsFile,
-            vocalsFile
-          );
-          return res
-            .status(500)
-            .json({ error: "Demucs output files not found." });
-        }
+    console.log("Spleeter output:", stdout);
 
-        // Return URLs for the separated audio stems
-        return res.json({
-          downloadNoVocalUrl: `/downloads/htdemucs/${id}/no_vocals.wav`,
-          downloadVocalUrl: `/downloads/htdemucs/${id}/vocals.wav`,
-        });
-      });
-    } else {
+    const id = path.basename(mp3Path, path.extname(mp3Path));
+    const vocalsPath = path.join(outputDir, id, "vocals.wav");
+    const accompanimentPath = path.join(outputDir, id, "accompaniment.wav");
+
+    if (!fs.existsSync(vocalsPath) || !fs.existsSync(accompanimentPath)) {
+      return res.status(500).json({ error: "Spleeter output files missing" });
+    }
+
+    return res.json({
+      downloadVocalUrl: `/downloads/spleeter_output/${id}/vocals.wav`,
+      downloadNoVocalUrl: `/downloads/spleeter_output/${id}/accompaniment.wav`,
+    });
+  });
+} else {
       return res.json({ downloadUrl: `/downloads/${id}.mp3` });
     }
   });
