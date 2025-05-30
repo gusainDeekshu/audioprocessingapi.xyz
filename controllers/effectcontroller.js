@@ -141,7 +141,7 @@ const processVideo = async (req, res) => {
       // Run Demucs to separate vocals and no vocals from the input mp3
       // -o specifies the parent output directory where Demucs creates 'htdemucs' subfolder
       // The input file is mp3Path, output goes to DOWNLOAD_DIR/htdemucs/{input_basename}/
-      const cmd = `python -m demucs --two-stems=vocals -o "${DOWNLOAD_DIR}" "${mp3Path}"`;
+      const cmd = `python3 -m demucs --two-stems=vocals -o "${DOWNLOAD_DIR}" "${mp3Path}"`;
       console.log("Executing Demucs command:", cmd);
 
       exec(cmd, (err, stdout, stderr) => {
