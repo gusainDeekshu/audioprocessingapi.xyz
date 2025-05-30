@@ -3,10 +3,13 @@ const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
 const effectroute=require('./routes/effectroute.js.js');
+const { cleanDownloadsDir } = require("./controllers/effectcontroller.js");
+require('dotenv').config();
 
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
+const CleaningInterval = process.env.CLEAN_INTERVAL || 300;
 app.use(cors());
 app.use(express.json());
 
@@ -19,6 +22,12 @@ app.use("/", (req, res) => {
   return res.status(200).json({ message: "Server is running" });
 });
 
+
+// Set interval to clean downloads folder every 5 minutes
+setInterval(() => {
+  console.log("Cleaning downloads directory... after every " + CleaningInterval+"ms");
+  cleanDownloadsDir();
+}, CleaningInterval);
 // app.post("/process", (req, res) => {
 //   const { youtubeUrl, effect } = req.body;
 //   const id = uuidv4();

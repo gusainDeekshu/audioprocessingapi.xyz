@@ -2,9 +2,36 @@ const { exec } = require("child_process");
 const { v4: uuidv4 } = require("uuid");
 const path = require("path");
 const fs = require("fs");
+  const DOWNLOAD_DIR = path.resolve(__dirname, "../downloads");
+
+function cleanDownloadsDir() {
+  fs.readdir(DOWNLOAD_DIR, (err, files) => {
+    if (err) {
+      console.error("Failed to read downloads directory:", err);
+      return;
+    }
+    files.forEach(file => {
+      const filePath = path.join(DOWNLOAD_DIR, file);
+      fs.stat(filePath, (err, stats) => {
+        if (err) {
+          console.error("Failed to stat file:", err);
+          return;
+        }
+        if (stats.isDirectory()) {
+          fs.rm(filePath, { recursive: true, force: true }, err => {
+            if (err) console.error("Failed to remove directory:", err);
+          });
+        } else {
+          fs.unlink(filePath, err => {
+            if (err) console.error("Failed to remove file:", err);
+          });
+        }
+      });
+    });
+  });
+}
 
 const processVideo = async (req, res) => {
-  const DOWNLOAD_DIR = path.resolve(__dirname, "../downloads");
   const COOKIES_PATH = "cookies.txt"; // Update if stored elsewhere
   const { youtubeUrl, effect } = req.body;
 
@@ -39,8 +66,8 @@ const processVideo = async (req, res) => {
      const cmd = `set TORCHAUDIO_AUDIO_BACKEND=soundfile && python -m demucs --two-stems=vocals -o "${DOWNLOAD_DIR}" "${mp3Path}"`;
 
       exec(cmd, (err3) => {
-        console.log("Demucs failed",err3)
-        if (err3) return res.status(500).json({ error: "Demucs failed" });
+        
+        if (err3){ console.log("Demucs failed",err3); return res.status(500).json({ error: "Demucs failed", })};
        const outputFile = path.join(DOWNLOAD_DIR, 'htdemucs', id, 'vocals.wav');
 if (!fs.existsSync(outputFile)) {
   return res.status(500).json({ error: "Demucs output missing" });
@@ -56,4 +83,5 @@ return res.json({ downloadNoVocalUrl: `/downloads/htdemucs/${id}/no_vocals.wav`,
 
 module.exports = {
   processVideo,
+  cleanDownloadsDir
 };

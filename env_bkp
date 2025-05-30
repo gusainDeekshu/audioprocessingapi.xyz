@@ -1,0 +1,3 @@
+PORT=3000
+# CLEAN_INTERVAL in miliseconds for cleaning the downloads directory
+CLEAN_INTERVAL=30000 
