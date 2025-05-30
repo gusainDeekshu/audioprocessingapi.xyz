@@ -3,26 +3,33 @@ const { v4: uuidv4 } = require("uuid");
 const path = require("path");
 const fs = require("fs");
 
-
 const processVideo = async (req, res) => {
-const DOWNLOAD_DIR = path.resolve(__dirname, "../downloads");
-const { youtubeUrl, effect } = req.body;
+  const DOWNLOAD_DIR = path.resolve(__dirname, "../downloads");
+  const COOKIES_PATH = "cookies.txt"; // Update if stored elsewhere
+  const { youtubeUrl, effect } = req.body;
 
-if (!youtubeUrl) {
-return res.status(400).json({ error: "youtubeUrl is required" });
-}
+  if (!youtubeUrl) {
+    return res.status(400).json({ error: "youtubeUrl is required" });
+  }
+
   const id = uuidv4();
   const mp3Path = path.join(DOWNLOAD_DIR, `${id}.mp3`);
   const processedPath = path.join(DOWNLOAD_DIR, `${id}_processed.mp3`);
 
-  const ytCmd = `yt-dlp -x --audio-format mp3 -o "${mp3Path}" "${youtubeUrl}"`;
+  // Note the use of .%(ext)s to allow yt-dlp to determine the correct extension
+  const ytCmd = `yt-dlp --cookies ${COOKIES_PATH} -x --audio-format mp3 -o "${DOWNLOAD_DIR}/${id}.%(ext)s" "${youtubeUrl}"`;
+
   exec(ytCmd, (err) => {
-    if (err){console.log(err);
-      return res.status(500).json({ error: "YouTube download failed" });} 
+    if (err) {
+      console.log("yt-dlp error:", err);
+      return res.status(500).json({ error: "YouTube download failed" });
+    }
 
     if (effect === "slowed_reverb") {
       const cmd = `ffmpeg -i "${mp3Path}" -filter_complex "atempo=0.85,aecho=0.8:0.9:1000:0.3" "${processedPath}"`;
       exec(cmd, (err2) => {
+        console.log("slowed_reverb:", err2);
+
         if (err2) return res.status(500).json({ error: "FFmpeg effect failed" });
         return res.json({ downloadSlowedReverbUrl: `/downloads/${id}_processed.mp3` });
       });
