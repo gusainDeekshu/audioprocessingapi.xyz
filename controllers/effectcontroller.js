@@ -141,7 +141,8 @@ const processVideo = async (req, res) => {
   const outputDir = path.join(DOWNLOAD_DIR, "spleeter_output");
   if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
 
-  const cmd = `spleeter separate -p spleeter:2stems -o "${outputDir}" "${mp3Path}"`;
+  // for locals const cmd = `spleeter separate -p spleeter:2stems -o "${outputDir}" "${mp3Path}"`;
+const cmd = `/home/ubuntu/.local/bin/spleeter separate -p spleeter:2stems -o "${outputDir}" "${mp3Path}"`;
 
   exec(cmd, (err, stdout, stderr) => {
     if (err) {
