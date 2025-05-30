@@ -32,8 +32,7 @@ function cleanDownloadsDir() {
 }
 
 const processVideo = async (req, res) => {
-  const COOKIES_PATH = path.join(__dirname, 'cookies.txt'); // __dirname is current directory of your script
-
+  const COOKIES_PATH = "/cookies.txt"; // Update if stored in /app
   const { youtubeUrl, effect } = req.body;
 
   if (!youtubeUrl) {
