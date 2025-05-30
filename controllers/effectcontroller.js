@@ -18,14 +18,13 @@ if (!fs.existsSync(configDir)) {
   fs.mkdirSync(configDir, { recursive: true });
 }
 
-
 function cleanDownloadsDir() {
   fs.readdir(DOWNLOAD_DIR, (err, files) => {
     if (err) {
       console.error("Failed to read downloads directory:", err);
       return;
     }
-    files.forEach(file => {
+    files.forEach((file) => {
       const filePath = path.join(DOWNLOAD_DIR, file);
       fs.stat(filePath, (err, stats) => {
         if (err) {
@@ -35,13 +34,14 @@ function cleanDownloadsDir() {
         if (stats.isDirectory()) {
           // Be careful with recursive delete, especially for demucs output
           // For now, let's only delete files and empty dirs if not `htdemucs`
-          if (file !== 'htdemucs') { // Avoid deleting the main demucs output folder
-            fs.rm(filePath, { recursive: true, force: true }, err => {
+          if (file !== "htdemucs") {
+            // Avoid deleting the main demucs output folder
+            fs.rm(filePath, { recursive: true, force: true }, (err) => {
               if (err) console.error("Remove dir failed:", filePath, err);
             });
           }
         } else {
-          fs.unlink(filePath, err => {
+          fs.unlink(filePath, (err) => {
             if (err) console.error("Remove file failed:", filePath, err);
           });
         }
@@ -64,14 +64,15 @@ const processVideo = async (req, res) => {
     return res.status(400).json({ error: "Invalid youtubeUrl format" });
   }
 
-
   const id = uuidv4();
   const mp3Path = path.join(DOWNLOAD_DIR, `${id}.mp3`);
   const processedPath = path.join(DOWNLOAD_DIR, `${id}_processed.mp3`);
 
   // Check if cookies file exists
   if (!fs.existsSync(COOKIES_FILE_PATH)) {
-    console.error(`Cookies file not found at: ${COOKIES_FILE_PATH}. YouTube downloads may fail for age-restricted or login-required videos.`);
+    console.error(
+      `Cookies file not found at: ${COOKIES_FILE_PATH}. YouTube downloads may fail for age-restricted or login-required videos.`
+    );
     // Decide if you want to fail here or let yt-dlp try without cookies
     // return res.status(500).json({ error: "Server configuration error: Cookies file missing." });
   }
@@ -89,17 +90,30 @@ const processVideo = async (req, res) => {
       console.error("yt-dlp stderr:", stderr); // Log stderr for more details
       // Check stderr for specific messages
       if (stderr && stderr.includes("Sign in to confirm")) {
-         return res.status(401).json({ error: "YouTube download failed. Video may require login or cookies are invalid/expired." });
+        return res
+          .status(401)
+          .json({
+            error:
+              "YouTube download failed. Video may require login or cookies are invalid/expired.",
+          });
       }
-      return res.status(500).json({ error: "YouTube download failed. Please check server logs." });
+      return res
+        .status(500)
+        .json({ error: "YouTube download failed. Please check server logs." });
     }
     console.log("yt-dlp stdout:", stdout); // Log stdout
 
     if (!fs.existsSync(mp3Path)) {
-        console.error(`Downloaded mp3 file not found at: ${mp3Path} after yt-dlp success.`);
-        return res.status(500).json({ error: "Downloaded audio file not found. yt-dlp might have had an issue." });
+      console.error(
+        `Downloaded mp3 file not found at: ${mp3Path} after yt-dlp success.`
+      );
+      return res
+        .status(500)
+        .json({
+          error:
+            "Downloaded audio file not found. yt-dlp might have had an issue.",
+        });
     }
-
 
     if (effect === "slowed_reverb") {
       const cmd = `ffmpeg -i "${mp3Path}" -filter_complex "atempo=0.85,aecho=0.8:0.9:1000:0.3" "${processedPath}"`;
@@ -112,47 +126,54 @@ const processVideo = async (req, res) => {
         }
         console.log("FFmpeg stdout:", ffmpegStdout);
         if (!fs.existsSync(processedPath)) {
-            console.error(`Processed mp3 file not found at: ${processedPath} after ffmpeg success.`);
-            return res.status(500).json({ error: "Processed audio file not found." });
-        }
-        return res.json({ downloadSlowedReverbUrl: `/downloads/${id}_processed.mp3` });
-      });
-    } else if (effect === "vocal_remove") {
-      // Demucs output path is relative to where it's run, or with -o
-      // The default output for `python -m demucs --two-stems=vocals -o "output_dir" "input_file.mp3"`
-      // will be `output_dir/htdemucs/input_file_basename/vocals.wav` and `no_vocals.wav`
-      const demucsOutputDir = path.join(DOWNLOAD_DIR, "htdemucs_output"); // A general output dir for demucs
-      const specificDemucsOutputPath = path.join(demucsOutputDir, 'htdemucs', id); // Demucs creates a subfolder with the model name, then input basename
-      const noVocalsFile = path.join(specificDemucsOutputPath, 'no_vocals.wav');
-      const vocalsFile = path.join(specificDemucsOutputPath, 'vocals.wav');
-
-      // Note: The -o for demucs specifies the *parent* directory for its 'htdemucs' output folder.
-      const cmd = `python3 -m demucs --two-stems=vocals -o "${demucsOutputDir}" "${mp3Path}"`;
-      console.log("Executing Demucs command:", cmd);
-
-      exec(cmd, (err3, demucsStdout, demucsStderr) => {
-        if (err3) {
-          console.error("Demucs error:", err3);
-          console.error("Demucs stderr:", demucsStderr);
-          return res.status(500).json({ error: "Demucs processing failed" });
-        }
-        console.log("Demucs stdout:", demucsStdout);
-
-        // Check if the expected output files exist
-        if (!fs.existsSync(vocalsFile) || !fs.existsSync(noVocalsFile)) {
-          console.error("Demucs output missing. Expected:", vocalsFile, "and", noVocalsFile);
-          console.error("Demucs stderr:", demucsStderr); // Demucs might have outputted to a different location or failed silently.
-          // You might want to list directory contents here for debugging:
-          // try {
-          //   const filesInDemucsDir = fs.readdirSync(specificDemucsOutputPath);
-          //   console.log(`Files in ${specificDemucsOutputPath}:`, filesInDemucsDir);
-          // } catch (e) { console.error("Could not read demucs output dir", e); }
-          return res.status(500).json({ error: "Demucs output files not found. Processing might have failed." });
+          console.error(
+            `Processed mp3 file not found at: ${processedPath} after ffmpeg success.`
+          );
+          return res
+            .status(500)
+            .json({ error: "Processed audio file not found." });
         }
         return res.json({
-          // Construct URL relative to the demucsOutputDir and its subpaths
-          downloadNoVocalUrl: `/downloads/htdemucs_output/htdemucs/${id}/no_vocals.wav`,
-          downloadVocalUrl: `/downloads/htdemucs_output/htdemucs/${id}/vocals.wav`,
+          downloadSlowedReverbUrl: `/downloads/${id}_processed.mp3`,
+        });
+      });
+    } else if (effect === "vocal_remove") {
+      // Run Demucs to separate vocals and no vocals from the input mp3
+      // -o specifies the parent output directory where Demucs creates 'htdemucs' subfolder
+      // The input file is mp3Path, output goes to DOWNLOAD_DIR/htdemucs/{input_basename}/
+      const cmd = `python -m demucs --two-stems=vocals -o "${DOWNLOAD_DIR}" "${mp3Path}"`;
+      console.log("Executing Demucs command:", cmd);
+
+      exec(cmd, (err, stdout, stderr) => {
+        if (err) {
+          console.error("Demucs error:", err);
+          console.error("Demucs stderr:", stderr);
+          return res.status(500).json({ error: "Demucs processing failed" });
+        }
+        console.log("Demucs stdout:", stdout);
+
+        // Construct expected output paths based on Demucs default output folder structure
+        const id = path.basename(mp3Path, path.extname(mp3Path));
+        const outputBasePath = path.join(DOWNLOAD_DIR, "htdemucs", id);
+        const noVocalsFile = path.join(outputBasePath, "no_vocals.wav");
+        const vocalsFile = path.join(outputBasePath, "vocals.wav");
+
+        // Verify that output files exist
+        if (!fs.existsSync(noVocalsFile) || !fs.existsSync(vocalsFile)) {
+          console.error(
+            "Demucs output files missing:",
+            noVocalsFile,
+            vocalsFile
+          );
+          return res
+            .status(500)
+            .json({ error: "Demucs output files not found." });
+        }
+
+        // Return URLs for the separated audio stems
+        return res.json({
+          downloadNoVocalUrl: `/downloads/htdemucs/${id}/no_vocals.wav`,
+          downloadVocalUrl: `/downloads/htdemucs/${id}/vocals.wav`,
         });
       });
     } else {
@@ -163,5 +184,5 @@ const processVideo = async (req, res) => {
 
 module.exports = {
   processVideo,
-  cleanDownloadsDir
+  cleanDownloadsDir,
 };
