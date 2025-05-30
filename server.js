@@ -15,6 +15,9 @@ const DOWNLOAD_DIR = path.join(__dirname, "downloads");
 if (!fs.existsSync(DOWNLOAD_DIR)) fs.mkdirSync(DOWNLOAD_DIR);
 app.use("/downloads", express.static(DOWNLOAD_DIR));
 app.use("/api", effectroute);
+app.use("/", (req, res) => {
+  return res.status(200).json({ message: "Server is running" });
+});
 
 // app.post("/process", (req, res) => {
 //   const { youtubeUrl, effect } = req.body;
