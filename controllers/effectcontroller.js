@@ -32,7 +32,7 @@ function cleanDownloadsDir() {
 }
 
 const processVideo = async (req, res) => {
-  const COOKIES_PATH = "/cookies.txt"; // Update if stored in /app
+ const COOKIES_PATH = path.resolve(__dirname, '../cookies.txt');
   const { youtubeUrl, effect } = req.body;
 
   if (!youtubeUrl) {
@@ -44,7 +44,7 @@ const processVideo = async (req, res) => {
   const processedPath = path.join(DOWNLOAD_DIR, `${id}_processed.mp3`);
 
   // Note the use of .%(ext)s to allow yt-dlp to determine the correct extension
-  const ytCmd = `yt-dlp --cookies ${COOKIES_PATH} -x --audio-format mp3 -o "${DOWNLOAD_DIR}/${id}.%(ext)s" "${youtubeUrl}"`;
+  const ytCmd = `yt-dlp --cookies "${COOKIES_PATH}" -x --audio-format mp3 -o "${DOWNLOAD_DIR}/${id}.%(ext)s" "${youtubeUrl}"`;
 
   exec(ytCmd, (err) => {
     if (err) {
