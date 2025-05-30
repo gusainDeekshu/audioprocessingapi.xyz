@@ -138,15 +138,12 @@ const processVideo = async (req, res) => {
         });
       });
     }else if (effect === "vocal_remove") {
-
   const outputDir = path.join(DOWNLOAD_DIR, "spleeter_output");
   if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
-return res.json({
-          downloadSlowedReverbUrl: `/downloads/$_processed.mp3`,
-        });
-  //  const cmd = `spleeter separate -p spleeter:2stems -o "${outputDir}" "${mp3Path}"`;
+
+  // for locals const cmd = `spleeter separate -p spleeter:2stems -o "${outputDir}" "${mp3Path}"`;
 const cmd = `/home/ubuntu/.local/bin/spleeter separate -p spleeter:2stems -o "${outputDir}" "${mp3Path}"`;
- 
+
   exec(cmd, (err, stdout, stderr) => {
     if (err) {
       console.error("Spleeter error:", err);
