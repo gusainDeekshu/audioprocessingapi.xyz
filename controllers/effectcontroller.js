@@ -73,6 +73,7 @@ const processVideo = async (req, res) => {
       console.log(`[spleeter] Executing: ${spleeterCmd}`);
       exec(spleeterCmd, (err, stdout, stderr) => {
         if (err) {
+          console.log(err +"this is error")
           console.error("Spleeter error:", stderr || err);
           return res.status(500).json({ error: "Vocal separation failed." });
         }
