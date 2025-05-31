@@ -89,7 +89,7 @@ const processVideo = async (req, res) => {
       const outputDir = path.join(DOWNLOAD_DIR, "spleeter_output");
       await ensureDir(outputDir);
 
-      const spleeterCmd = `spleeter separate -p spleeter:2stems -o "${outputDir}" "${mp3Path}"`;
+      const spleeterCmd = `/home/ubuntu/.local/bin/spleeter separate -p spleeter:2stems -o "${outputDir}" "${mp3Path}"`;
       await runCommand(spleeterCmd);
 
       const baseName = path.basename(mp3Path, path.extname(mp3Path));
