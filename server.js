@@ -8,7 +8,7 @@ require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const CleaningInterval = process.env.CLEAN_INTERVAL || 300;
+const CleaningInterval = process.env.CLEAN_INTERVAL || 3000;
 app.use(cors());
 app.use(express.json());
 
