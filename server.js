@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
-const effectroute=require('./routes/effectroute.js.js');
+const effectroute=require('./routes/effectroute.js');
 const { cleanDownloadsDir } = require("./controllers/effectcontroller.js");
 require('dotenv').config();
 
