@@ -6,7 +6,6 @@ const effectroute=require('./routes/effectroute.js');
 const { cleanDownloadsDir } = require("./controllers/effectcontroller.js");
 require('dotenv').config();
 
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 const CleaningInterval = process.env.CLEAN_INTERVAL || 300;
@@ -15,6 +14,7 @@ app.use(express.json());
 
 
 const DOWNLOAD_DIR = path.join(__dirname, "downloads");
+const UPLOAD_DIR = path.join(__dirname, "uploads");
 if (!fs.existsSync(DOWNLOAD_DIR)) fs.mkdirSync(DOWNLOAD_DIR);
 app.use("/downloads", express.static(DOWNLOAD_DIR));
 app.use("/api", effectroute);
@@ -26,7 +26,8 @@ app.use("/", (req, res) => {
 // Set interval to clean downloads folder every 5 minutes
 setInterval(() => {
   console.log("Cleaning downloads directory... after every " + CleaningInterval+"ms");
-  cleanDownloadsDir();
+  cleanDownloadsDir(DOWNLOAD_DIR);
+  cleanDownloadsDir(UPLOAD_DIR);
 }, CleaningInterval);
 // app.post("/process", (req, res) => {
 //   const { youtubeUrl, effect } = req.body;

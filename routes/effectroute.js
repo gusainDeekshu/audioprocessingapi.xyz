@@ -4,7 +4,7 @@ const multer = require("multer");
 
 const router=Router();
 // File upload middleware
-const upload = multer({ dest: "downloads/uploads" });
+const upload = multer({ dest: "uploads" });
 router.post("/process",upload.single("file"),processVideo);
 
 

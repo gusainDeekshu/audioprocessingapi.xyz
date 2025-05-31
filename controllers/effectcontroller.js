@@ -6,6 +6,7 @@ const fs = require("fs");
 
 const execPromise = promisify(exec);
 const DOWNLOAD_DIR = path.resolve(__dirname, "../downloads");
+const UPLOAD_DIR = path.resolve(__dirname, "../uploads");
 const COOKIES_FILE_PATH = path.resolve(__dirname, "../config/cookies.txt");
 
 // Ensure download directory exists
@@ -88,7 +89,7 @@ const spleeterCmd = `/home/ubuntu/.local/bin/spleeter separate -p spleeter:2stem
     return res.download(mp3Path);
   }
 };
-function cleanDownloadsDir() {
+function cleanDownloadsDir(DOWNLOAD_DIR) {
   fs.readdir(DOWNLOAD_DIR, (err, files) => {
     if (err) {
       console.error("Failed to read downloads directory:", err);
@@ -96,6 +97,7 @@ function cleanDownloadsDir() {
     }
     files.forEach((file) => {
       const filePath = path.join(DOWNLOAD_DIR, file);
+      
       fs.stat(filePath, (err, stats) => {
         if (err) {
           console.error("Stat error cleaning file:", filePath, err);
@@ -116,6 +118,7 @@ function cleanDownloadsDir() {
           });
         }
       });
+      
     });
   });
 }
