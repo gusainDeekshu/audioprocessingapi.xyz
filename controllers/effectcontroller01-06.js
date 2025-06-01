@@ -74,7 +74,7 @@ const processVideo = async (req, res) => {
     // Apply effects
     if (effect === "slowed_reverb") {
       const processedPath = path.join(DOWNLOAD_DIR, `${id}_processed.mp3`);
-      const ffmpegCmd = `ffmpeg -y -i "${mp3Path}" -vn -filter_complex "atempo=0.85,aecho=0.8:0.9:1000:0.3" "${processedPath}"`;
+      const ffmpegCmd = `ffmpeg -y -i "${mp3Path}" -filter_complex "atempo=0.85,aecho=0.8:0.9:1000:0.3" "${processedPath}"`;
 
       await runCommand(ffmpegCmd);
 
