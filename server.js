@@ -22,6 +22,7 @@ app.use("/", (req, res) => {
   return res.status(200).json({ message: "Server is running" });
 });
 
+
 // Set interval to clean downloads folder every 5 minutes
 setInterval(() => {
   console.log("Cleaning downloads directory... after every " + CleaningInterval+"ms");
