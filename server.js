@@ -24,11 +24,11 @@ app.use("/", (req, res) => {
 
 
 // Set interval to clean downloads folder every 5 minutes
-setInterval(() => {
-  console.log("Cleaning downloads directory... after every " + CleaningInterval+"ms");
-  cleanDownloadsDir(DOWNLOAD_DIR);
-  cleanDownloadsDir(UPLOAD_DIR);
-}, CleaningInterval);
+// setInterval(() => {
+//   console.log("Cleaning downloads directory... after every " + CleaningInterval+"ms");
+//   cleanDownloadsDir(DOWNLOAD_DIR);
+//   cleanDownloadsDir(UPLOAD_DIR);
+// }, CleaningInterval);
 // app.post("/process", (req, res) => {
 //   const { youtubeUrl, effect } = req.body;
 //   const id = uuidv4();
