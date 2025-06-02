@@ -7,8 +7,8 @@ const { cleanDownloadsDir } = require("./controllers/effectcontroller.js");
 require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-const CleaningInterval = process.env.CLEAN_INTERVAL || 3000;
+const PORT = process.env.PORT || 3001;
+const CleaningInterval = process.env.CLEAN_INTERVAL || 300000;
 app.use(cors());
 app.use(express.json());
 
